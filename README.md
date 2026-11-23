@@ -3,28 +3,10 @@
 Placeholder for reusable GitHub Actions workflows for
 [Lightpath project repositories](https://github.com/project-lightpath).
 
-## Repository setup
-
-After the initial commit, a repository admin with authenticated `gh` can run
-[protect-default-branch.sh](hacks/protect-default-branch.sh):
-
-```bash
-bash hacks/protect-default-branch.sh project-lightpath/shared-workflows
-```
-
-The script is a bootstrap helper, not a configuration reconciler. It refuses to
-replace existing protection. It requires two approvals, including code-owner
-review where applicable, dismisses stale approvals, and blocks
-force-pushes/deletion, including for admins.
-
 ## Registry
 
 Use public image repositories under
 [`quay.io/project-lightpath`](https://quay.io/organization/project-lightpath).
-Anonymous pulls require no credentials.
-
-No repositories are pre-created; specific repository names are pending
-downstream architecture decisions.
 
 ## Access and credentials
 
@@ -32,13 +14,8 @@ downstream architecture decisions.
   limited to select image repositories.
 - `QUAY_USERNAME` and `QUAY_TOKEN` are stored as organization Actions secrets in
   GitHub, with **Selected repositories** access for approved publishers only.
-- Quay administrators manage repository access and record the robot name,
-  grants, and rotation owner. Revoke compromised tokens, replace them securely
-  in GitHub, and repeat the access check after rotation. Never expose values in
-  source, logs, or other published output.
 
-Pass credentials explicitly to reusable workflows; do not use
-`secrets: inherit`:
+Pass credentials explicitly to reusable workflows:
 
 ```yaml
 secrets:
@@ -46,17 +23,13 @@ secrets:
   quay-password: ${{ secrets.QUAY_TOKEN }}
 ```
 
-Here, `quay-password` is the robot token, not a personal password.
-
 ## Workflow safety
 
 - Pin reusable workflows and action dependencies to reviewed full commit SHAs;
   hardcode each caller's approved image destination.
-- Keep PR checks free of Quay credentials and use minimal GitHub permissions.
-  Only trusted, reviewed jobs may receive push credentials; never use
-  `pull_request_target` to execute untrusted code with secrets.
-- Organization secrets are repository-scoped, **not branch-scoped**. Workflow
-  branch conditions and log masking are not credential-isolation mechanisms.
+- Keep PR checks free of Quay credentials. Only trusted, reviewed jobs may
+  receive push credentials; never use `pull_request_target` to execute untrusted
+  code with secrets.
 
 ## Artifact references
 
